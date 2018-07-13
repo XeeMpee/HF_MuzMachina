@@ -10,35 +10,38 @@ public class Main {
         try {
             Sequencer sequencer = MidiSystem.getSequencer();
             sequencer.open();
-
             Sequence sequence = new Sequence(Sequence.PPQ, 4);
-
             Track track = sequence.createTrack();
 
-            ShortMessage a = new ShortMessage();
-            a.setMessage(144, 1, 'c', 100);
-            MidiEvent nute1S = new MidiEvent(a, 4);
-            track.add(nute1S);
-
-            ShortMessage b = new ShortMessage();
-            b.setMessage(128, 1, 'c', 100);
-            MidiEvent nute1E = new MidiEvent(b, 16);
-            track.add(nute1E);
-
-            ShortMessage c = new ShortMessage();
-            c.setMessage(144, 1, 'd', 100);
-            MidiEvent nute2S = new MidiEvent(c, 17);
-            track.add(nute2S);
-
-            ShortMessage d = new ShortMessage();
-            d.setMessage(128, 1, 'd', 100);
-            MidiEvent nute2E = new MidiEvent(d, 32);
-            track.add(nute2E);
+            int tick = 0;
+            int len = 8;
+            int gamaMovement = -5;
+            for(int i=0;i<8; i++){
+                ShortMessage mS = new ShortMessage();
+                mS.setMessage(144, 1, 'c'+i+(gamaMovement*7), 100);
+                MidiEvent nuteS = new MidiEvent(mS, tick);
+                tick += len;
+                ShortMessage mE = new ShortMessage();
+                mE.setMessage(128, 1, 'c'+i+(gamaMovement*7), 100);
+                MidiEvent nuteE = new MidiEvent(mE, tick);
+                track.add(nuteS);
+                track.add(nuteE);
+            }
+            for(int i=0;i<8; i++){
+                ShortMessage mS = new ShortMessage();
+                mS.setMessage(144, 1, 'c'+7-i+(gamaMovement*7), 100);
+                MidiEvent nuteS = new MidiEvent(mS, tick);
+                tick += len;
+                ShortMessage mE = new ShortMessage();
+                mE.setMessage(128, 1, 'c'+7-i+(gamaMovement*7), 100);
+                MidiEvent nuteE = new MidiEvent(mE, tick);
+                track.add(nuteS);
+                track.add(nuteE);
+            }
 
             sequencer.setSequence(sequence);
             
             sequencer.start();
-            // sequencer.close();
 
         } catch (Exception e) {
             e.printStackTrace();
