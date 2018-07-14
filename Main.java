@@ -1,59 +1,55 @@
 import javax.sound.midi.*;
 
-public class Main {
+public class Main implements ControllerEventListener {
     public static void main(String[] args) {
         System.out.println("Hello World!");
-        play();
+        Main main = new Main();
+        main.play();
     }
 
-    public static void play(){
+    public void play(){
         try {
             Sequencer sequencer = MidiSystem.getSequencer();
             sequencer.open();
+
+            int[] zdarzeniaObslugiwane = {127};
+            sequencer.addControllerEventListener(this, zdarzeniaObslugiwane);
+
             Sequence sequence = new Sequence(Sequence.PPQ, 4);
             Track track = sequence.createTrack();
 
-            int tick = 0;
-            int len = 8;
-            int gamaMovement = -5;
-            int speed = 127;
-
-            for(int i=0;i<16; i+=2){
-                ShortMessage mS = new ShortMessage();
-                mS.setMessage(144, 1, 'c'+i+(gamaMovement*7), speed);
-                MidiEvent nuteS = new MidiEvent(mS, tick);
-                tick += len;
-                ShortMessage mE = new ShortMessage();
-                mE.setMessage(128, 1, 'c'+i+(gamaMovement*7), speed);
-                MidiEvent nuteE = new MidiEvent(mE, tick);
-                track.add(nuteS);
-                track.add(nuteE);
+            for(int i=0;i<=21; i+=4){
+                track.add(createEvent(144, 1, i+48, 100, i));
+                track.add(createEvent(176, 1, 127, 0, i));
+                track.add(createEvent(128, 1, i+48, 100, i+2));
             }
-
-            ShortMessage m = new ShortMessage();
-            m.setMessage(192, 1, 102, 0);
-            MidiEvent event = new MidiEvent(m, tick);
-            track.add(event);
-
-            for(int i=0;i<16; i+=2){
-                ShortMessage mS = new ShortMessage();
-                mS.setMessage(144, 1, 'c'+14-i+(gamaMovement*7), speed);
-                MidiEvent nuteS = new MidiEvent(mS, tick);
-                tick += len;
-                ShortMessage mE = new ShortMessage();
-                mE.setMessage(128, 1, 'c'+14-i+(gamaMovement*7), speed);
-                MidiEvent nuteE = new MidiEvent(mE, tick);
-                track.add(nuteS);
-                track.add(nuteE);
-            }
-
-            sequencer.setSequence(sequence);
             
+            sequencer.setSequence(sequence);
+            sequencer.setTempoInBPM(220);
             sequencer.start();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static MidiEvent createEvent(int plc, int kanal, int jeden, int dwa, int takt){
+        
+        MidiEvent event = null;
+        try{
+            ShortMessage a = new ShortMessage();
+            a.setMessage(plc, kanal, jeden, dwa);
+            event = new MidiEvent(a, takt);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return event;
+    }
+
+    @Override
+    public void controlChange(ShortMessage event) {
+        System.out.println("la");        
     }
 
 }
